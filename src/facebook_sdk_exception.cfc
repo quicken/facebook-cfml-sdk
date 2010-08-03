@@ -46,7 +46,7 @@
 		<cfreturn msg>
 	</cffunction>
 
-	<cffunction name="getType" access="public" returntype="struct" hint="Returns the associated type for the error. This will default to 'Exception' when a type is not available.">
+	<cffunction name="getType" access="public" returntype="string" hint="Returns the associated type for the error. This will default to 'Exception' when a type is not available.">
 		<cfif structKeyExists(variables.result,'error') AND structKeyExists(variables.result['error'],'type')>
 			<cfreturn variables.result['error']['type']>
 		</cfif>

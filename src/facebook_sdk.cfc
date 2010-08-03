@@ -206,10 +206,18 @@
 
 		<cfscript>
 		structInsert(arguments.params,'api_key',getAppId(),true);
-		structInsert(arguments.params,'cancel_url',currentUrl,true); // the url to go to after the user cancels
-		structInsert(arguments.params,'display','page',true); // can be "page" (default, full page) or "popup"
-		structInsert(arguments.params,'fbconnect',1,true);
-		structInsert(arguments.params,'next',currentUrl,true); // the url to go to after a successful login
+		if(NOT structKeyExists(arguments.params,'cancel_url')){
+			structInsert(arguments.params,'cancel_url',currentUrl,true); // the url to go to after the user cancels
+		}
+		if(NOT structKeyExists(arguments.params,'display')){
+			structInsert(arguments.params,'display','page',true); // can be "page" (default, full page) or "popup"
+		}
+		if(NOT structKeyExists(arguments.params,'fbconnect')){
+			structInsert(arguments.params,'fbconnect',1,true);
+		}
+		if(NOT structKeyExists(arguments.params,'next')){
+			structInsert(arguments.params,'next',currentUrl,true); // the url to go to after a successful login
+		}
 		structInsert(arguments.params,'return_session',1,true);
 		structInsert(arguments.params,'session_version',3,true);
 		structInsert(arguments.params,'v','1.0',true);
@@ -222,7 +230,9 @@
 		<cfargument name="params" required="false" type="struct" default="#structNew()#" hint="provide custom parameters">
 
 		<cfscript>
-		structInsert(arguments.params,'next',getCurrentUrl(),true); //the url to go to after a successful logout
+		if(NOT structKeyExists(arguments.params,'next')){
+			structInsert(arguments.params,'next',getCurrentUrl(),true); //the url to go to after a successful logout
+		}
 		structInsert(arguments.params,'access_token',getAccessToken(),true);
 		</cfscript>
 
@@ -336,6 +346,10 @@
 			</cfhttp>
 
 			<cfcatch type="any">
+				<cfif this.DEBUG>
+					<cflog file="debug" type="warning" text="facebook_makeRequest|#arguments.uri#|#serializeJSON(arguments.params)#">
+				</cfif>
+
 				<cfif isDefined('cfhttp.statusCode')>
 					<cfset exception.error_code = cfhttp.statusCode>
 				<cfelse>
@@ -676,7 +690,7 @@
 
 	<cffunction name="fb_throw" access="private" returntype="void" hint="Custom way to handle throwing exceptions in this component.">
 		<cfargument name="error" required="true" type="struct">
-		<cfset this.exception.init(arguments.init)>
+		<cfset this.exception.init(arguments.error)>
 
 		<cfif this.exception.getType() EQ "OAuthException">
 			<cfset setSession(structNew())>
